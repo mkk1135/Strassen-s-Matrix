@@ -7,15 +7,18 @@
 This project is an interactive web-based visualization tool for Strassen’s matrix multiplication algorithm. It helps you understand how the algorithm works internally by breaking down each step of the computation.
 
 The tool shows:
-- Division of matrices into submatrices
-- Computation of intermediate products P1 to P7
-- Combination into the final result matrix
-- Comparison with the naive multiplication method
+- Division of matrices into submatrices  
+- Computation of intermediate products P1 to P7  
+- Combination into the final result matrix  
+- Comparison with the naive multiplication method  
 
 It also includes learning modules to explain complexity, access patterns, and divide and conquer design.
 
 Live Demo:  
 https://mkk1135.github.io/Strassen-s-Matrix/
+
+Repository:  
+https://github.com/mkk1135/Strassen-s-Matrix
 
 ---
 
@@ -46,14 +49,14 @@ Implements Strassen’s algorithm, step execution, visualization, charts, and in
 
 ### Run Locally
 
-1. Download or clone the repository:
+1. Clone the repository:
    ```
- https://github.com/mkk1135/Strassen-s-Matrix
+   git clone https://github.com/mkk1135/Strassen-s-Matrix.git
    ```
 
 2. Open the project folder.
 
-3. Open `index.html` in a browser.
+3. Open `index.html` in a browser (Chrome recommended).
 
 ---
 
@@ -67,64 +70,64 @@ https://mkk1135.github.io/Strassen-s-Matrix/
 ## USAGE GUIDE
 
 ### Matrix Input
-- Enter values manually or use presets
-- Step-by-step mode supports 2×2 matrices
+- Enter values manually or use presets  
+- Step-by-step mode supports 2×2 matrices  
 
 ### Controls
-- Build Steps: prepares execution
-- Step: executes one step
-- Play: runs automatically
-- Pause: stops execution
-- Reset: clears everything
-- Speed: controls animation speed
+- Build Steps: prepares execution  
+- Step: executes one step  
+- Play: runs automatically  
+- Pause: stops execution  
+- Reset: clears everything  
+- Speed: controls animation speed  
 
 ### Execution Behavior
 Each step:
-- Highlights pseudocode
-- Shows calculation with actual values
-- Updates counters
-- Updates visualization
+- Highlights pseudocode  
+- Shows calculation with actual values  
+- Updates counters  
+- Updates visualization  
 
 ### Operation Counters
-- Multiplications
-- Add/Subtract operations
-- Naive multiplications
-- Operations saved
+- Multiplications  
+- Add/Subtract operations  
+- Naive multiplications  
+- Operations saved  
 
 ### Visualization
-- Matrices A and B displayed as grids
-- P1–P7 appear during computation
-- Result matrix C builds step by step
+- Matrices A and B displayed as grids  
+- P1–P7 appear during computation  
+- Result matrix C builds step by step  
 
 ### Step History
-- Shows all steps with descriptions
-- Click any step to jump back
+- Shows all steps with descriptions  
+- Click any step to jump back  
 
 ---
 
 ## LEARNING MODULES
 
 ### CLO-1: Complexity Analysis
-- O(n³) vs O(n^2.807)
-- Growth comparison charts
-- Crossover point visualization
+- O(n³) vs O(n^2.807)  
+- Growth comparison charts  
+- Crossover point visualization  
 
 ### CLO-2: Access Patterns
-- Shows element access
-- Compares naive vs Strassen method
-- Demonstrates reduced multiplications
+- Shows element access  
+- Compares naive vs Strassen method  
+- Demonstrates reduced multiplications  
 
 ### CLO-3: Divide and Conquer
-- Matrix splitting visualization
-- Recursion tree
-- 7 recursive calls vs 8 naive
+- Matrix splitting visualization  
+- Recursion tree  
+- 7 recursive calls vs 8 naive  
 
 ### Learn Tab
-- Algorithm explanation
-- Worked example
-- Key concepts
-- Common mistakes
-- Space complexity
+- Algorithm explanation  
+- Worked example  
+- Key concepts  
+- Common mistakes  
+- Space complexity  
 
 ---
 
