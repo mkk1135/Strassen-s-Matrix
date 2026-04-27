@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strassen's Matrix Multiplication – Interactive Visualizer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+<!-- ========== SIDEBAR ========== -->
+<div id="sidebar">
+  <div>
+    <h1>Strassen's Matrix Multiplication</h1>
+    <div style="color:var(--muted);font-size:11px">BCS 309 · Algorithms I · Spring 2026</div>
+  </div>
+
+  <!-- Status + Step -->
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span id="statusbadge" class="status-badge s-idle">Idle</span>
+    <span id="stepcounter" style="font-size:12px;color:var(--muted)">Step 0 / 0</span>
+  </div>
+
+  <!-- Custom Input -->
+  <div class="card">
+    <h2>Matrix Input (2×2 only for step-by-step)</h2>
+    <div id="matinput">
+      <div class="mat-input-block">
+        <label>Matrix A (rows, space-separated)</label>
+        <textarea id="matA" placeholder="Add first matrix or choose Preset"></textarea>
+      </div>
+      <div class="mat-input-block">
+        <label>Matrix B (rows, space-separated)</label>
+        <textarea id="matB" placeholder="Add second matrix or choose Preset"></textarea>
+      </div>
+    </div>
+    <div class="preset-row" style="margin-top:8px">
+      <span style="font-size:11px;color:var(--muted);align-self:center">Presets:</span>
+      <button class="preset-btn" onclick="loadPreset(0)">Identity×Random</button>
+      <button class="preset-btn" onclick="loadPreset(1)">Zeros Trick</button>
+      <button class="preset-btn" onclick="loadPreset(2)">Large Values</button>
+      <button class="preset-btn" onclick="loadPreset(3)">Symmetric</button>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-card card" id="controls-card">
+    <h2>Controls</h2>
+    <div class="btn-row">
+      <button onclick="buildSteps()" id="btn-build">Build Steps</button>
+      <button onclick="stepFwd()" id="btn-step" disabled>Step ▶</button>
+      <button onclick="play()" id="btn-play" class="primary" disabled>Play ▶</button>
+      <button onclick="pause()" id="btn-pause" disabled>Pause ⏸</button>
+      <button onclick="reset()" id="btn-reset">Reset ↺</button>
+    </div>
+    <div style="margin-top:10px">
+      <label>Speed: <span id="speedlabel">1x</span></label>
+      <input type="range" id="speedslider" min="1" max="8" value="4" oninput="updateSpeed()">
+    </div>
+  </div>
+
+  <!-- Counters -->
+  <div class="card">
+    <h2>Operation Counters</h2>
+    <div class="counter-grid">
+      <div class="counter-item"><div class="val" id="c-mult">0</div><div class="lbl">Multiplications</div></div>
+      <div class="counter-item"><div class="val" id="c-add">0</div><div class="lbl">Add/Subtract</div></div>
+      <div class="counter-item"><div class="val" id="c-naive-mult">0</div><div class="lbl">Naive Mults</div></div>
+      <div class="counter-item"><div class="val" id="c-saved">0</div><div class="lbl">Ops Saved</div></div>
+    </div>
+  </div>
+
+  <!-- Pseudocode -->
+  <div class="card">
+    <h2>Pseudocode</h2>
+    <div id="pseudocode"></div>
+  </div>
+
+  <!-- Step Explanation -->
+  <div class="card">
+    <h2>Step Explanation</h2>
+    <div id="stepbox">Press <strong>Build Steps</strong> to begin.</div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <h2>Step History (click to jump)</h2>
+    <div class="hist-wrap">
+      <table id="historytable"><thead><tr><th>#</th><th>Phase</th><th>Description</th></tr></thead>
+      <tbody id="histbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN ========== -->
+<div id="main">
+  <!-- Section tabs -->
+  <div id="section-tabs">
+    <button class="active" onclick="showSection('viz')">🎬 Visualization</button>
+    <button onclick="showSection('clo1')">📈 CLO-1: Complexity</button>
+    <button onclick="showSection('clo2')">🔍 CLO-2: Access Patterns</button>
+    <button onclick="showSection('clo3')">🌳 CLO-3: D&amp;C Paradigm</button>
+    <button onclick="showSection('edu')">📚 Learn</button>
+  </div>
+
+  <!-- VIZ SECTION -->
+  <div id="sec-viz" class="section-panel active">
+    <div class="card">
+      <div class="legend-row" id="legend"></div>
+      <div id="vizarea">
+        <svg id="vizsvg" width="100%" height="360"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLO-1 SECTION -->
+  <div id="sec-clo1" class="section-panel">
+    <div class="card">
+      <h2>CLO-1 · Asymptotic Analysis</h2>
+      <div class="concept-box">Naive: <strong>T(n) = 8T(n/2) + Θ(n²)</strong> → O(n³) &nbsp;|&nbsp; Strassen: <strong>T(n) = 7T(n/2) + Θ(n²)</strong> → O(n<sup>log₂7</sup>) ≈ O(n<sup>2.807</sup>)</div>
+      <div style="margin:10px 0;color:var(--muted);font-size:12px">Crossover point: Strassen overtakes naive at n ≈ <strong style="color:var(--accent)">~32–64</strong> depending on constants.</div>
+      <div id="charttabs">
+        <button class="active" onclick="showChart('growth')">Growth Curves</button>
+        <button onclick="showChart('crossover')">Crossover Analysis</button>
+        <button onclick="showChart('complexity')">Complexity Table</button>
+      </div>
+      <div id="chart-growth" class="tab-panel active"><canvas id="canvas-growth" width="680" height="280"></canvas></div>
+      <div id="chart-crossover" class="tab-panel"><canvas id="canvas-crossover" width="680" height="280"></canvas></div>
+      <div id="chart-complexity" class="tab-panel">
+        <table id="historytable" style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:#21262d"><th style="padding:6px 12px">n</th><th>Naive n³</th><th>Strassen n^2.807</th><th>Ratio (Naive/Strassen)</th><th>Ops Saved</th></tr></thead>
+          <tbody id="cxbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px">
+        <label>Drag to explore n: <span id="nlabel">32</span></label>
+        <input type="range" id="nslider" min="2" max="512" value="32" oninput="updateCharts()">
+      </div>
+    </div>
+    <div class="card">
+      <h2>Worst-Case Demo</h2>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:8px">For Strassen, worst-case and average-case are both <strong>O(n<sup>2.807</sup>)</strong> — unlike sorting algorithms, there is no "lucky" input. Every 2×2 multiplication always uses exactly <strong>7 multiplications</strong> and <strong>18 add/subtracts</strong>.</div>
+      <div class="warn-box">⚠ <strong>Common Mistake:</strong> Thinking Strassen is always faster. For small n (n&lt;32), naive is faster due to constant overhead. Strassen is only asymptotically superior.</div>
+    </div>
+  </div>
+
+  <!-- CLO-2 SECTION -->
+  <div id="sec-clo2" class="section-panel">
+    <div class="card">
+      <h2>CLO-2 · Element Access Patterns</h2>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Watch how each method accesses matrix elements. Strassen re-uses intermediate sums, dramatically reducing the number of multiplications needed.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="text-align:center;font-weight:600;color:var(--red);margin-bottom:8px">Naive (8 multiplications)</div>
+          <svg id="naive-svg" width="100%" height="260"></svg>
+        </div>
+        <div>
+          <div style="text-align:center;font-weight:600;color:var(--green);margin-bottom:8px">Strassen (7 multiplications)</div>
+          <svg id="strassen-svg" width="100%" height="260"></svg>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <button onclick="animateAccess(0)" id="acc-prev" disabled>◀ Prev</button>
+        <button onclick="startAccess()" id="acc-play">▶ Animate Access</button>
+        <button onclick="animateAccess(1)" id="acc-next" disabled>Next ▶</button>
+      </div>
+      <div id="access-explain" style="margin-top:8px;background:#0d2137;border-radius:6px;padding:8px;font-size:12px;min-height:36px">Click Animate to watch element access patterns side by side.</div>
+    </div>
+    <div class="card">
+      <h2>Impact of Removing Optimization</h2>
+      <div style="color:var(--muted);font-size:12px">If we naively use 8 multiplications instead of 7: each recursion level multiplies the gap. At depth d, naive does 8ᵈ multiplications vs Strassen's 7ᵈ. The ratio 8ᵈ/7ᵈ = (8/7)ᵈ grows exponentially with recursion depth.</div>
+      <canvas id="canvas-impact" width="660" height="180" style="margin-top:10px"></canvas>
+    </div>
+  </div>
+
+  <!-- CLO-3 SECTION -->
+  <div id="sec-clo3" class="section-panel">
+    <div class="card">
+      <h2>CLO-3 · Divide &amp; Conquer Paradigm</h2>
+      <div class="concept-box"><strong>Paradigm: Divide &amp; Conquer</strong><br>
+        1. <strong>Divide:</strong> Split each n×n matrix into four n/2 × n/2 submatrices.<br>
+        2. <strong>Conquer:</strong> Compute 7 products P₁–P₇ (instead of 8) using clever linear combinations.<br>
+        3. <strong>Combine:</strong> Add/subtract P₁–P₇ to form the four quadrants of result C.
+      </div>
+      <h2>Recursion Tree</h2>
+      <div id="recursion-svg-wrap"><svg id="rec-svg" width="660" height="300"></svg></div>
+      <div style="margin-top:8px">
+        <label>Recursion depth to show: <span id="depthlabel">2</span></label>
+        <input type="range" id="depthslider" min="1" max="4" value="2" oninput="drawRecTree()">
+      </div>
+    </div>
+    <div class="card">
+      <h2>Why 7 and Not 8? The Key Insight</h2>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:8px">Strassen found linear combinations of the submatrices that allow computing C using 7 multiplications + 18 additions, instead of 8 multiplications + 4 additions (naive 2×2).</div>
+      <svg id="formula-svg" width="100%" height="240" style="display:block"></svg>
+    </div>
+    <div class="card">
+      <h2>Counterexample: Why Greedy Fails Here</h2>
+      <div style="color:var(--muted);font-size:12px">A greedy approach might try to pick the "cheapest" element to multiply first. But matrix multiplication has strict order constraints (non-commutative in general). A greedy choice can miss the global structure that Strassen exploits — showing why D&C is the right paradigm here.</div>
+      <div class="warn-box">🔴 Greedy: AB ≠ BA for matrices. A greedy heuristic cannot discover the 7-product trick — it requires global algebraic insight, not local decisions.</div>
+    </div>
+  </div>
+
+  <!-- EDU SECTION -->
+  <div id="sec-edu" class="section-panel">
+    <details open>
+      <summary>📖 Algorithm Overview</summary>
+      <div class="details-body">
+        <p><strong>What it does:</strong> Strassen's algorithm multiplies two n×n matrices faster than the naive O(n³) approach by reducing the number of recursive multiplications from 8 to 7.</p>
+        <p style="margin-top:8px"><strong>Why it matters:</strong> In 1969, Volker Strassen proved that the obvious O(n³) bound is not tight. His algorithm runs in O(n<sup>log₂7</sup>) ≈ O(n<sup>2.807</sup>), which is a meaningful improvement for large matrices used in graphics, ML, and scientific computing.</p>
+        <p style="margin-top:8px"><strong>When to use:</strong> Theoretically better for n &gt; ~32, but in practice cache effects mean standard BLAS libraries often outperform Strassen for moderate n. It shines in distributed computing for very large matrices.</p>
+      </div>
+    </details>
+    <details>
+      <summary>🧮 Fully Worked Example (Step-by-Step)</summary>
+      <div class="details-body" id="worked-example"></div>
+    </details>
+    <details>
+      <summary>💡 Key Concepts</summary>
+      <div class="details-body">
+        <div class="concept-box">Strassen's 7 Products for 2×2:<br>
+          P₁ = (A₁₁+A₂₂)(B₁₁+B₂₂) &nbsp; P₂ = (A₂₁+A₂₂)B₁₁<br>
+          P₃ = A₁₁(B₁₂−B₂₂) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P₄ = A₂₂(B₂₁−B₁₁)<br>
+          P₅ = (A₁₁+A₁₂)B₂₂ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P₆ = (A₂₁−A₁₁)(B₁₁+B₁₂)<br>
+          P₇ = (A₁₂−A₂₂)(B₂₁+B₂₂)
+        </div>
+        <div class="concept-box" style="margin-top:8px">Result Construction:<br>
+          C₁₁ = P₁+P₄−P₅+P₇ &nbsp; C₁₂ = P₃+P₅<br>
+          C₂₁ = P₂+P₄ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C₂₂ = P₁−P₂+P₃+P₆
+        </div>
+        <div class="warn-box" style="margin-top:8px">⚠ <strong>Common Mistakes:</strong><br>
+          • Confusing P₄ = A₂₂(B₂₁−B₁₁) with (A₂₁−A₁₁)B₂₂ (that's P₆)<br>
+          • Forgetting the subtraction in C₁₁ = P₁+P₄−P₅+P₇<br>
+          • Thinking the algorithm works for odd-size matrices without padding
+        </div>
+      </div>
+    </details>
+    <details>
+      <summary>📐 Space Complexity Analysis</summary>
+      <div class="details-body">
+        <p><strong>Time:</strong> O(n<sup>log₂7</sup>) ≈ O(n<sup>2.807</sup>) — from the Master Theorem: a=7, b=2, f(n)=Θ(n²), log₂7 ≈ 2.807 &gt; 2, so Case 1 applies.</p>
+        <p style="margin-top:8px"><strong>Space:</strong> O(n²) for the 7 intermediate product matrices P₁–P₇ at each recursion level, plus O(log n) stack frames → O(n² log n) total auxiliary space.</p>
+        <p style="margin-top:8px"><strong>Comparison:</strong> Naive uses O(n²) space (just the output matrix). Strassen uses more memory — a trade-off for fewer multiplications.</p>
+      </div>
+    </details>
+  </div>
+</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
