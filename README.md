@@ -164,7 +164,7 @@ This reduces time complexity from O(n³) to O(n^2.807).
 
 ## STUDENT INFO
 
-Name: Your Name  
-Roll Number: Your Roll Number  
-Course: Design and Analysis of Algorithms  
+Student Name: Mubarak Alkheyli
+Roll Number: 20220002430
+Course: Algorithms-I (BCS 309)  
 Project: Strassen Matrix Multiplication Visualizer
