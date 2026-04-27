@@ -48,7 +48,7 @@ Implements Strassen’s algorithm, step execution, visualization, charts, and in
 
 1. Download or clone the repository:
    ```
-   git clone https://github.com/your-username/your-repo-name.git
+ https://github.com/mkk1135/Strassen-s-Matrix
    ```
 
 2. Open the project folder.
